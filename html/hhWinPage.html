@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+	<title>hhWinPage</title>
+	
+	<link rel="stylesheet" href="../hhframe.css" />
+</head>
+<body>
+	
+	<hh-page class="hhWinPage">
+		
+		<hh-header :title="title" ref="header">
+			<hh-header-back slot="left" @click="Return"></hh-header-back>
+		</hh-header>
+		
+	</hh-page>
+	
+	<script src="../../vue.js"></script>
+	<script src="../hhframe.umd.min.js"></script>
+	<script>
+		hh.PageReady(function(){
+			var vm = new Vue({
+				el: ".hhWinPage",
+				data: {
+					title: api.pageParam.title,
+					url: api.pageParam.url
+				},
+				mounted: function()
+				{
+					// 打开页面
+					this.$nextTick(function(){
+						setTimeout(function(){
+							api.openFrame({
+								name: "hhWinFrame",
+								url: vm.url,
+								rect: {
+									marginTop: hh.Elm.getElm(vm.$refs.header.$el).offsetHeight,
+									marginBottom: 0
+								},
+								bounces: true
+							});
+						},100);
+					});
+					
+					// 后退处理
+					api.addEventListener({name:"keyback"},function(){
+						vm.Return();
+					});
+				},
+				methods: {
+					// 后退处理
+					Return: function()
+					{
+						// 当打开的页面又进行了页面跳转，就会产生多条记录，此时点击返回按钮，
+						// 应该是返回上一页，而不是关闭整个窗口
+						api.execScript({
+							name: api.winName,
+							frameName: "hhWinFrame",
+							script: hh.Win.back.toString().replace(/((^function [a-z]+\(\)\{)|(\}$))/ig,"")
+						});
+					}
+				}
+			});
+		});
+	</script>
+	
+</body>
+</html>
